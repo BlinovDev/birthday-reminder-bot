@@ -30,6 +30,7 @@ func main() {
 func sendMessage(bot *tgbotapi.BotAPI, chatID int64, text string) {
 	msg := tgbotapi.NewMessage(chatID, text)
 
+	// TODO: process commands like /add_bd, /all_bd, /next_bd
 	_, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Failed to send message: %v", err)
