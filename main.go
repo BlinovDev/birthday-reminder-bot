@@ -2,6 +2,7 @@ package main
 
 import (
 	// "fmt"
+	// "fmt"
 	"log"
 
 	// "birthday-reminder-bot/birthdays_helper"
@@ -17,12 +18,20 @@ func main() {
 
 	for update := range updates {
 		if update.Message != nil {
-			incoming_message := update.Message
+			message := update.Message
+			chat := message.Chat.ID
+			text := message.Text
 
-			incoming_text := incoming_message.Text
-			incoming_chat := incoming_message.Chat.ID
+			if text == "/start" {
+				// Send a minimal message with the inline keyboard
+				start_msg := "Welcome! Nice to see you in birthday-reminder-bot.\n\nHere you can store your relatives and friends birthdays and get reminders about their birthdays. Use keyboard to call main bot functions.\n\nEnjoy!"
 
-			sendMessage(&bot, incoming_chat, incoming_text)
+				msg := tgbotapi.NewMessage(chat, start_msg)
+				msg.ReplyMarkup = getPresetMessageKeyboard()
+				bot.Send(msg)
+			} else {
+				sendMessage(&bot, chat, text)
+			}
 		}
 	}
 }
@@ -63,4 +72,18 @@ func prepare_bot() (tgbotapi.BotAPI, config_helper.Config, tgbotapi.UpdateConfig
 	new_update.Timeout = 60
 
 	return *bot, *config, new_update
+}
+
+func getPresetMessageKeyboard() tgbotapi.ReplyKeyboardMarkup {
+	// Define the reply keyboard with preset messages
+	buttons := [][]tgbotapi.KeyboardButton{
+		{
+			tgbotapi.NewKeyboardButton("Add birthday"),
+			tgbotapi.NewKeyboardButton("Saved Birthdays"),
+		},
+		// { },
+	}
+
+	// Create and return the keyboard markup
+	return tgbotapi.NewReplyKeyboard(buttons...)
 }

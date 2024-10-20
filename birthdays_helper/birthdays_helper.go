@@ -17,6 +17,7 @@ type Birthday struct {
 	Name     string    `json:"name"`
 	TgName   string    `json:"tg_name"`
 	Birthday time.Time `json:"birthday"`
+	ChatID   int       `json:"chat_id"`
 }
 
 // Helper function to read birthdays from file
@@ -61,7 +62,7 @@ func writeBirthdays(tasks []Birthday) error {
 	return nil
 }
 
-func AddBirthday(name string, tg_name string, birthday time.Time) error {
+func AddBirthday(name string, tg_name string, birthday time.Time, chat_id int) error {
 	// Read the existing birthdays
 	birthdays, err := readBirthdays()
 	if err != nil {
@@ -79,6 +80,7 @@ func AddBirthday(name string, tg_name string, birthday time.Time) error {
 		Name:     name,
 		TgName:   tg_name,
 		Birthday: birthday,
+		ChatID:   chat_id,
 	}
 
 	// Append the new birthday

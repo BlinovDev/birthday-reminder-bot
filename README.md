@@ -4,7 +4,7 @@ This project represents Telegram bot for storing people birthdays and notify abo
 
 ## TODO list
 
-- [ ] Add buttons for main commands;
+- [x] Add buttons for main commands;
 - [ ] Develop birthday adding process;
 - [ ] Configure reminder task that can be initiated as cron;
 - [ ] Develop messages cleaning instrument;
