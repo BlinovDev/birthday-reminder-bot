@@ -20,6 +20,21 @@ type Birthday struct {
 	ChatID   int       `json:"chat_id"`
 }
 
+func Initialise() Birthday {
+	birthdays, _ := readBirthdays()
+
+	newID := 1
+	if len(birthdays) > 0 {
+		newID = birthdays[len(birthdays)-1].ID + 1 // Increment ID from last birthday
+	}
+
+	newBirthday := Birthday{
+		ID: newID,
+	}
+
+	return newBirthday
+}
+
 // Helper function to read birthdays from file
 func readBirthdays() ([]Birthday, error) {
 	var birthdays []Birthday
@@ -75,7 +90,7 @@ func AddBirthday(name string, tg_name string, birthday time.Time, chat_id int) e
 		newID = birthdays[len(birthdays)-1].ID + 1 // Increment ID from last birthday
 	}
 
-	newTask := Birthday{
+	newBirthday := Birthday{
 		ID:       newID,
 		Name:     name,
 		TgName:   tg_name,
@@ -84,7 +99,7 @@ func AddBirthday(name string, tg_name string, birthday time.Time, chat_id int) e
 	}
 
 	// Append the new birthday
-	birthdays = append(birthdays, newTask)
+	birthdays = append(birthdays, newBirthday)
 
 	// Write the updated birthday back to the file
 	err = writeBirthdays(birthdays)
