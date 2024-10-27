@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"birthday-reminder-bot/commands_handler"
-	"birthday-reminder-bot/config_helper"
 	"birthday-reminder-bot/reminder_sender"
 
+	tgconfighelper "github.com/BlinovDev/go-tg-bot-config-helper"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -39,7 +39,7 @@ func main() {
 
 func prepare_bot() (tgbotapi.BotAPI, tgbotapi.UpdateConfig, string) {
 	// Read configs from specified file
-	config, err := config_helper.LoadConfig()
+	config, err := tgconfighelper.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
@@ -53,7 +53,7 @@ func prepare_bot() (tgbotapi.BotAPI, tgbotapi.UpdateConfig, string) {
 	new_update := tgbotapi.NewUpdate(0)
 	new_update.Timeout = 60
 
-	cron_time_pattern := config.Bot.CronTimePattern
+	cron_time_pattern := config.Bot.FirstCron
 
 	return *bot, new_update, cron_time_pattern
 }

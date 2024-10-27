@@ -1,3 +1,7 @@
+github.com/BlinovDev/go-tg-bot-config-helper v0.0.0-20241027122430-a100c8dc0b3e h1:wpLvK1tEa9ZBSTXg/B8ofr8iUWUuXastuZWMHI5lhg4=
+github.com/BlinovDev/go-tg-bot-config-helper v0.0.0-20241027122430-a100c8dc0b3e/go.mod h1:rdCYLRVMXMwSvt606QZ/kA8iIFQLNcdyaqto8CDwo30=
+github.com/BlinovDev/go-tg-bot-config-helper v0.0.0-20241027145320-960062df750b h1:wbwFpNmwTakwNLgt8uGjCyc1dE5DM+jw0/OXLVyZZU0=
+github.com/BlinovDev/go-tg-bot-config-helper v0.0.0-20241027145320-960062df750b/go.mod h1:rdCYLRVMXMwSvt606QZ/kA8iIFQLNcdyaqto8CDwo30=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 h1:wG8n/XJQ07TmjbITcGiUaOtXxdrINDz1b0J1w0SzqDc=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1/go.mod h1:A2S0CWkNylc2phvKXWBBdD3K0iGnDBGbzRpISP2zBl8=
 github.com/robfig/cron/v3 v3.0.1 h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=
