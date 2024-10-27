@@ -8,10 +8,11 @@ import (
 // define struct to access config file
 type Config struct {
 	Bot struct {
-		Token      string `yaml:"token"`
-		WebHookURL string `yaml:"webhook_url"`
-		CertFile   string `yaml:"cert_file"`
-		KeyFile    string `yaml:"key_file"`
+		Token           string `yaml:"token"`
+		WebHookURL      string `yaml:"webhook_url"`
+		CertFile        string `yaml:"cert_file"`
+		KeyFile         string `yaml:"key_file"`
+		CronTimePattern string `yaml:"cron_time_pattern"`
 	} `yaml:"bot"`
 }
 

@@ -1,18 +1,25 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"birthday-reminder-bot/commands_handler"
 	"birthday-reminder-bot/config_helper"
+	"birthday-reminder-bot/reminder_sender"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func main() {
-	bot, new_update := prepare_bot()
+	bot, new_update, cron_time_pattern := prepare_bot()
+	fmt.Println("Bot prepared!")
+
+	reminder_sender.Setup_cron_reminder(bot, cron_time_pattern)
+	fmt.Println("Cron set up!")
 
 	updates := bot.GetUpdatesChan(new_update)
+	fmt.Println("Read updates...")
 
 	for update := range updates {
 		if update.Message != nil {
@@ -30,7 +37,7 @@ func main() {
 	}
 }
 
-func prepare_bot() (tgbotapi.BotAPI, tgbotapi.UpdateConfig) {
+func prepare_bot() (tgbotapi.BotAPI, tgbotapi.UpdateConfig, string) {
 	// Read configs from specified file
 	config, err := config_helper.LoadConfig()
 	if err != nil {
@@ -46,5 +53,7 @@ func prepare_bot() (tgbotapi.BotAPI, tgbotapi.UpdateConfig) {
 	new_update := tgbotapi.NewUpdate(0)
 	new_update.Timeout = 60
 
-	return *bot, new_update
+	cron_time_pattern := config.Bot.CronTimePattern
+
+	return *bot, new_update, cron_time_pattern
 }
