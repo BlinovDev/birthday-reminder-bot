@@ -100,6 +100,26 @@ func HandleNewBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 }
 
+func HandleUpdateBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	userID := update.Message.From.ID
+	chatID := update.Message.Chat.ID
+
+	tempBirthdays[userID] = birthdays_helper.Birthday{ChatID: int(chatID)}
+
+	msg := tgbotapi.NewMessage(chatID, "Whose birthday do you want to update?")
+	bot.Send(msg)
+	userState[userID] = "update_waiting_for_name"
+}
+
+func HandleDeleteBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	userID := update.Message.From.ID
+	chatID := update.Message.Chat.ID
+
+	msg := tgbotapi.NewMessage(chatID, "Enter the name to delete:")
+	bot.Send(msg)
+	userState[userID] = "delete_waiting_for_name"
+}
+
 func HandleAnswerMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	userID := update.Message.From.ID
 	chatID := update.Message.Chat.ID
@@ -153,6 +173,8 @@ func getPresetMessageKeyboard() tgbotapi.ReplyKeyboardMarkup {
 	buttons := [][]tgbotapi.KeyboardButton{
 		{tgbotapi.NewKeyboardButton("/add_new_birthday")},
 		{tgbotapi.NewKeyboardButton("/show_saved_birthdays")},
+		{tgbotapi.NewKeyboardButton("/update_birthday")},
+		{tgbotapi.NewKeyboardButton("/delete_birthday")},
 	}
 
 	// Create and return the keyboard markup
