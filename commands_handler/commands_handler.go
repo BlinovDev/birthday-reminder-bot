@@ -47,7 +47,13 @@ func handleTgNameInput(bot *tgbotapi.BotAPI, userID, chatID int64, text, nextSta
 		birthday.TgName = text
 	}
 
-	err := birthdays_helper.AddBirthday(birthday.Name, birthday.TgName, birthday.Birthday, birthday.ChatID)
+	var err error
+	if action == "update" {
+		err = birthdays_helper.Update(birthday.Name, birthday.TgName, birthday.Birthday, birthday.ChatID)
+	} else {
+		err = birthdays_helper.AddBirthday(birthday.Name, birthday.TgName, birthday.Birthday, birthday.ChatID)
+	}
+
 	if err != nil {
 		msg := tgbotapi.NewMessage(chatID, "An error occurred while saving the birthday.")
 		bot.Send(msg)
@@ -138,6 +144,16 @@ func HandleAnswerMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		handleTgNameInput(bot, userID, chatID, text, "", "", "add")
 	case "update_waiting_for_tg_name":
 		handleTgNameInput(bot, userID, chatID, text, "", "", "update")
+	case "delete_waiting_for_name":
+		err := birthdays_helper.Delete(text)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Error: "+err.Error())
+			bot.Send(msg)
+		} else {
+			msg := tgbotapi.NewMessage(chatID, "Birthday deleted successfully!")
+			bot.Send(msg)
+		}
+		delete(userState, userID)
 	}
 }
 
@@ -168,25 +184,15 @@ func HandleViewBirthdays(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
-func HandleDeleteBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+func HandleHelp(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
-	name := update.Message.CommandArguments()
-
-	if name == "" {
-		msg := tgbotapi.NewMessage(chatID, "Usage: /delete_birthday <name>")
-		bot.Send(msg)
-		return
-	}
-
-	err := birthdays_helper.Delete(name)
-	if err != nil {
-		msg := tgbotapi.NewMessage(chatID, "Error: "+err.Error())
-		bot.Send(msg)
-		return
-	}
-
-	msg := tgbotapi.NewMessage(chatID, "Birthday deleted successfully!")
-
+	helpMsg := "Here is the list of commands:\n" +
+		"/start - welcome message\n" +
+		"/add_new_birthday - add a new birthday\n" +
+		"/show_saved_birthdays - show stored birthdays\n" +
+		"/help - show this message"
+	msg := tgbotapi.NewMessage(chatID, helpMsg)
+	msg.ReplyMarkup = getPresetMessageKeyboard()
 	bot.Send(msg)
 }
 
