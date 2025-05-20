@@ -11,6 +11,65 @@ import (
 var userState = make(map[int64]string)
 var tempBirthdays = make(map[int64]birthdays_helper.Birthday)
 
+// helper function to process name input
+func handleNameInput(bot *tgbotapi.BotAPI, userID, chatID int64, text, nextState, prompt string) {
+	birthday := tempBirthdays[userID]
+	birthday.Name = text
+	tempBirthdays[userID] = birthday
+	msg := tgbotapi.NewMessage(chatID, prompt)
+	bot.Send(msg)
+	userState[userID] = nextState
+}
+
+// helper function to process birthday input
+func handleBirthdayInput(bot *tgbotapi.BotAPI, userID, chatID int64, text, nextState, prompt string) {
+	birthday := tempBirthdays[userID]
+	bday, err := time.Parse("2006-01-02", text)
+	if err != nil {
+		msg := tgbotapi.NewMessage(chatID, "Invalid date format. Please enter the birthday in YYYY-MM-DD format:")
+		bot.Send(msg)
+		return
+	}
+
+	birthday.Birthday = bday
+	tempBirthdays[userID] = birthday
+	msg := tgbotapi.NewMessage(chatID, prompt)
+	bot.Send(msg)
+	userState[userID] = nextState
+}
+
+// helper function to process telegram name and finalise saving
+func handleTgNameInput(bot *tgbotapi.BotAPI, userID, chatID int64, text, nextState, prompt, action string) {
+	birthday := tempBirthdays[userID]
+	if text == "skip" {
+		birthday.TgName = ""
+	} else {
+		birthday.TgName = text
+	}
+
+	err := birthdays_helper.AddBirthday(birthday.Name, birthday.TgName, birthday.Birthday, birthday.ChatID)
+	if err != nil {
+		msg := tgbotapi.NewMessage(chatID, "An error occurred while saving the birthday.")
+		bot.Send(msg)
+	} else {
+		successMsg := "Birthday added successfully!\nName: " + birthday.Name +
+			"\nDate: " + birthday.Birthday.Format("2006-01-02") +
+			"\nTelegram: " + birthday.TgName
+		if action == "update" {
+			successMsg = "Birthday updated successfully!\nName: " + birthday.Name +
+				"\nDate: " + birthday.Birthday.Format("2006-01-02") +
+				"\nTelegram: " + birthday.TgName
+		}
+		msg := tgbotapi.NewMessage(chatID, successMsg)
+		bot.Send(msg)
+	}
+
+	delete(userState, userID)
+	delete(tempBirthdays, userID)
+	_ = nextState
+	_ = prompt
+}
+
 func HandleStart(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	message := update.Message
 	chat := message.Chat.ID
@@ -48,64 +107,17 @@ func HandleAnswerMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	switch userState[userID] {
 	case "waiting_for_name":
-		// Retrieve the current Birthday struct from the map
-		birthday := tempBirthdays[userID]
-
-		// Modify the Name field
-		birthday.Name = text
-
-		// Put the updated struct back into the map
-		tempBirthdays[userID] = birthday
-
-		msg := tgbotapi.NewMessage(chatID, "Please enter the person's birthday (YYYY-MM-DD):")
-		bot.Send(msg)
-		userState[userID] = "waiting_for_birthday"
-
+		handleNameInput(bot, userID, chatID, text, "waiting_for_birthday", "Please enter the person's birthday (YYYY-MM-DD):")
+	case "update_waiting_for_name":
+		handleNameInput(bot, userID, chatID, text, "update_waiting_for_birthday", "Please enter the person's birthday (YYYY-MM-DD):")
 	case "waiting_for_birthday":
-		birthday := tempBirthdays[userID]
-
-		// Parse the birthday
-		bday, err := time.Parse("2006-01-02", text)
-		if err != nil {
-			msg := tgbotapi.NewMessage(chatID, "Invalid date format. Please enter the birthday in YYYY-MM-DD format:")
-			bot.Send(msg)
-			return
-		}
-
-		// Update the birthday field
-		birthday.Birthday = bday
-
-		// Store it back in the map
-		tempBirthdays[userID] = birthday
-
-		msg := tgbotapi.NewMessage(chatID, "Optionally, enter the person's Telegram username (or type 'skip'):")
-		bot.Send(msg)
-		userState[userID] = "waiting_for_tg_name"
-
+		handleBirthdayInput(bot, userID, chatID, text, "waiting_for_tg_name", "Optionally, enter the person's Telegram username (or type 'skip'):")
+	case "update_waiting_for_birthday":
+		handleBirthdayInput(bot, userID, chatID, text, "update_waiting_for_tg_name", "Optionally, enter the person's Telegram username (or type 'skip'):")
 	case "waiting_for_tg_name":
-		birthday := tempBirthdays[userID]
-
-		if text == "skip" {
-			birthday.TgName = ""
-		} else {
-			birthday.TgName = text
-		}
-
-		// Save the updated birthday
-		err := birthdays_helper.AddBirthday(birthday.Name, birthday.TgName, birthday.Birthday, birthday.ChatID)
-		if err != nil {
-			msg := tgbotapi.NewMessage(chatID, "An error occurred while saving the birthday.")
-			bot.Send(msg)
-		} else {
-			msg := tgbotapi.NewMessage(chatID, "Birthday added successfully!\nName: "+birthday.Name+
-				"\nDate: "+birthday.Birthday.Format("2006-01-02")+
-				"\nTelegram: "+birthday.TgName)
-			bot.Send(msg)
-		}
-
-		// Clear the user's state and temporary data
-		delete(userState, userID)
-		delete(tempBirthdays, userID)
+		handleTgNameInput(bot, userID, chatID, text, "", "", "add")
+	case "update_waiting_for_tg_name":
+		handleTgNameInput(bot, userID, chatID, text, "", "", "update")
 	}
 }
 
