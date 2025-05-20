@@ -30,6 +30,10 @@ func main() {
 				commands_handler.HandleNewBirthday(&bot, update)
 			case "/show_saved_birthdays":
 				commands_handler.HandleViewBirthdays(&bot, update)
+			case "/update_birthday":
+				commands_handler.HandleUpdateBirthday(&bot, update)
+			case "/delete_birthday":
+				commands_handler.HandleDeleteBirthday(&bot, update)
 			case "/help":
 				commands_handler.HandleHelp(&bot, update)
 			default:

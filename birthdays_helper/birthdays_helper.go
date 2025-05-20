@@ -2,7 +2,7 @@ package birthdays_helper
 
 import (
 	"encoding/json"
-	// "fmt"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -121,13 +121,13 @@ func GetBirthdays() ([]Birthday, error) {
 }
 
 func Delete(name string) error {
-	// Read the existing tasks
+	// Read the existing birthdays
 	birthdays, err := readBirthdays()
 	if err != nil {
 		return err
 	}
 
-	// Find and remove the task by ID
+	// Find the index of the birthday by name
 	index := -1
 	for i, birthday := range birthdays {
 		if birthday.Name == name {
@@ -136,18 +136,43 @@ func Delete(name string) error {
 		}
 	}
 
-	// if index == -1 {
-	// 	return fmt.Errorf("task with ID %d not found", message_id)
-	// }
+	// If not found, return an error
+	if index == -1 {
+		return fmt.Errorf("birthday with name %s not found", name)
+	}
 
-	// Remove the task from the slice
+	// Remove the birthday from the slice
 	birthdays = append(birthdays[:index], birthdays[index+1:]...)
 
-	// Write the updated tasks back to the file
+	// Write the updated birthdays back to the file
 	err = writeBirthdays(birthdays)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func Update(name string, tg_name string, birthday time.Time, chat_id int) error {
+	birthdays, err := readBirthdays()
+	if err != nil {
+		return err
+	}
+
+	index := -1
+	for i, b := range birthdays {
+		if b.Name == name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return nil
+	}
+
+	birthdays[index].Birthday = birthday
+	birthdays[index].TgName = tg_name
+	birthdays[index].ChatID = chat_id
+
+	return writeBirthdays(birthdays)
 }
