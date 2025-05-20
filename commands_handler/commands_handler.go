@@ -186,6 +186,7 @@ func HandleDeleteBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 
 	msg := tgbotapi.NewMessage(chatID, "Birthday deleted successfully!")
+
 	bot.Send(msg)
 }
 

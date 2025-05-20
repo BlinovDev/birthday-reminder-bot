@@ -34,6 +34,8 @@ func main() {
 				commands_handler.HandleUpdateBirthday(&bot, update)
 			case "/delete_birthday":
 				commands_handler.HandleDeleteBirthday(&bot, update)
+			case "/help":
+				commands_handler.HandleHelp(&bot, update)
 			default:
 				commands_handler.HandleAnswerMessage(&bot, update)
 			}
