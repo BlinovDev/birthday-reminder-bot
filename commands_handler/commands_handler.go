@@ -41,6 +41,26 @@ func HandleNewBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 }
 
+func HandleUpdateBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	userID := update.Message.From.ID
+	chatID := update.Message.Chat.ID
+
+	tempBirthdays[userID] = birthdays_helper.Birthday{ChatID: int(chatID)}
+
+	msg := tgbotapi.NewMessage(chatID, "Whose birthday do you want to update?")
+	bot.Send(msg)
+	userState[userID] = "update_waiting_for_name"
+}
+
+func HandleDeleteBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	userID := update.Message.From.ID
+	chatID := update.Message.Chat.ID
+
+	msg := tgbotapi.NewMessage(chatID, "Enter the name to delete:")
+	bot.Send(msg)
+	userState[userID] = "delete_waiting_for_name"
+}
+
 func HandleAnswerMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	userID := update.Message.From.ID
 	chatID := update.Message.Chat.ID
@@ -106,6 +126,57 @@ func HandleAnswerMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		// Clear the user's state and temporary data
 		delete(userState, userID)
 		delete(tempBirthdays, userID)
+
+	case "update_waiting_for_name":
+		birthday := tempBirthdays[userID]
+		birthday.Name = text
+		tempBirthdays[userID] = birthday
+		msg := tgbotapi.NewMessage(chatID, "Enter new birthday (YYYY-MM-DD):")
+		bot.Send(msg)
+		userState[userID] = "update_waiting_for_birthday"
+
+	case "update_waiting_for_birthday":
+		birthday := tempBirthdays[userID]
+		bday, err := time.Parse("2006-01-02", text)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Invalid date format. Please enter the birthday in YYYY-MM-DD format:")
+			bot.Send(msg)
+			return
+		}
+		birthday.Birthday = bday
+		tempBirthdays[userID] = birthday
+		msg := tgbotapi.NewMessage(chatID, "Optionally, enter the person's Telegram username (or type 'skip'):")
+		bot.Send(msg)
+		userState[userID] = "update_waiting_for_tg_name"
+
+	case "update_waiting_for_tg_name":
+		birthday := tempBirthdays[userID]
+		if text == "skip" {
+			birthday.TgName = ""
+		} else {
+			birthday.TgName = text
+		}
+		err := birthdays_helper.Update(birthday.Name, birthday.TgName, birthday.Birthday, birthday.ChatID)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "An error occurred while updating the birthday.")
+			bot.Send(msg)
+		} else {
+			msg := tgbotapi.NewMessage(chatID, "Birthday updated successfully!")
+			bot.Send(msg)
+		}
+		delete(userState, userID)
+		delete(tempBirthdays, userID)
+
+	case "delete_waiting_for_name":
+		err := birthdays_helper.Delete(text)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "An error occurred while deleting the birthday.")
+			bot.Send(msg)
+		} else {
+			msg := tgbotapi.NewMessage(chatID, "Birthday deleted.")
+			bot.Send(msg)
+		}
+		delete(userState, userID)
 	}
 }
 
@@ -141,6 +212,8 @@ func getPresetMessageKeyboard() tgbotapi.ReplyKeyboardMarkup {
 	buttons := [][]tgbotapi.KeyboardButton{
 		{tgbotapi.NewKeyboardButton("/add_new_birthday")},
 		{tgbotapi.NewKeyboardButton("/show_saved_birthdays")},
+		{tgbotapi.NewKeyboardButton("/update_birthday")},
+		{tgbotapi.NewKeyboardButton("/delete_birthday")},
 	}
 
 	// Create and return the keyboard markup

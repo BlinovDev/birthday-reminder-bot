@@ -151,3 +151,27 @@ func Delete(name string) error {
 
 	return nil
 }
+
+func Update(name string, tg_name string, birthday time.Time, chat_id int) error {
+	birthdays, err := readBirthdays()
+	if err != nil {
+		return err
+	}
+
+	index := -1
+	for i, b := range birthdays {
+		if b.Name == name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return nil
+	}
+
+	birthdays[index].Birthday = birthday
+	birthdays[index].TgName = tg_name
+	birthdays[index].ChatID = chat_id
+
+	return writeBirthdays(birthdays)
+}
