@@ -136,6 +136,27 @@ func HandleViewBirthdays(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
+func HandleDeleteBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	chatID := update.Message.Chat.ID
+	name := update.Message.CommandArguments()
+
+	if name == "" {
+		msg := tgbotapi.NewMessage(chatID, "Usage: /delete_birthday <name>")
+		bot.Send(msg)
+		return
+	}
+
+	err := birthdays_helper.Delete(name)
+	if err != nil {
+		msg := tgbotapi.NewMessage(chatID, "Error: "+err.Error())
+		bot.Send(msg)
+		return
+	}
+
+	msg := tgbotapi.NewMessage(chatID, "Birthday deleted successfully!")
+	bot.Send(msg)
+}
+
 func getPresetMessageKeyboard() tgbotapi.ReplyKeyboardMarkup {
 	// Define the reply keyboard with preset messages
 	buttons := [][]tgbotapi.KeyboardButton{
