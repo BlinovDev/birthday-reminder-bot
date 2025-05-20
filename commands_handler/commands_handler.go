@@ -102,8 +102,6 @@ func HandleNewBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(chatID, "Please enter the person's name:")
 	bot.Send(msg)
 	userState[userID] = "waiting_for_name"
-	return
-
 }
 
 func HandleUpdateBirthday(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
