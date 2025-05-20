@@ -30,6 +30,8 @@ func main() {
 				commands_handler.HandleNewBirthday(&bot, update)
 			case "/show_saved_birthdays":
 				commands_handler.HandleViewBirthdays(&bot, update)
+			case "/help":
+				commands_handler.HandleHelp(&bot, update)
 			default:
 				commands_handler.HandleAnswerMessage(&bot, update)
 			}

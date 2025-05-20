@@ -148,6 +148,18 @@ func HandleViewBirthdays(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
+func HandleHelp(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
+	chatID := update.Message.Chat.ID
+	helpMsg := "Here is the list of commands:\n" +
+		"/start - welcome message\n" +
+		"/add_new_birthday - add a new birthday\n" +
+		"/show_saved_birthdays - show stored birthdays\n" +
+		"/help - show this message"
+	msg := tgbotapi.NewMessage(chatID, helpMsg)
+	msg.ReplyMarkup = getPresetMessageKeyboard()
+	bot.Send(msg)
+}
+
 func getPresetMessageKeyboard() tgbotapi.ReplyKeyboardMarkup {
 	// Define the reply keyboard with preset messages
 	buttons := [][]tgbotapi.KeyboardButton{
